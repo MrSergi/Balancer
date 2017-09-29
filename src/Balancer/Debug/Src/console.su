@@ -1,0 +1,13 @@
+console.c:193:13:prv_sigint	0	static
+console.c:157:16:prv_complet	32	static
+console.c:127:13:cmdHelp	8	static
+console.c:224:6:microrl_sendString	8	static
+console.c:38:6:consoleInit	8	static
+console.c:43:6:microrl_terminalInit	8	static
+console.c:56:6:microrl_terminalProcess	16	static
+console.c:67:6:microrl_printString	0	static
+console.c:72:6:microrl_printStringWithEndl	8	static
+console.c:137:12:prv_execute	24	static
+console.c:78:6:microrl_printEndl	0	static
+console.c:94:5:fc_printf	16	static
+console.c:201:6:consoleInput	24	static

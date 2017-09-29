@@ -1,0 +1,2 @@
+console_cmd.c:12:6:cmdStatus	8	static
+console_cmd.c:35:6:cmdClear	8	static
