@@ -57,6 +57,7 @@ volatile uint32_t periodBlink;
 void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -110,7 +111,8 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-
+	MX_DMA_Init();
+	MX_ADC1_Init();
 	MX_USB_DEVICE_Init();
 
 	consoleInit();
@@ -226,9 +228,20 @@ static void MX_GPIO_Init(void)
 
 }
 
-/* USER CODE BEGIN 4 */
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
-/* USER CODE END 4 */
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+}
 
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)

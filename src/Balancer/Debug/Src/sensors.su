@@ -1,0 +1,2 @@
+sensors.c:6:9:cpuTemp	8	static
+sensors.c:14:6:sensorInit	0	static
