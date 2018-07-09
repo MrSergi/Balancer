@@ -5,5 +5,5 @@ stm32f1xx_it.c:99:6:BusFault_Handler	0	static
 stm32f1xx_it.c:115:6:UsageFault_Handler	0	static
 stm32f1xx_it.c:131:6:DebugMon_Handler	0	static
 stm32f1xx_it.c:144:6:SysTick_Handler	8	static
-stm32f1xx_it.c:166:6:DMA1_Channel1_IRQHandler	0	static
-stm32f1xx_it.c:180:6:USB_LP_CAN1_RX0_IRQHandler	0	static
+stm32f1xx_it.c:167:6:DMA1_Channel1_IRQHandler	0	static
+stm32f1xx_it.c:181:6:USB_LP_CAN1_RX0_IRQHandler	0	static

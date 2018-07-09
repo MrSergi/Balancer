@@ -5,7 +5,7 @@ stm32f1xx_ll_usb.c:1535:19:USB_SetCurrentMode	0	static
 stm32f1xx_ll_usb.c:1552:19:USB_DevInit	8	static
 stm32f1xx_ll_usb.c:1578:19:USB_FlushTxFifo	0	static
 stm32f1xx_ll_usb.c:1592:19:USB_FlushRxFifo	0	static
-stm32f1xx_ll_usb.c:1607:19:USB_ActivateEndpoint	12	static
+stm32f1xx_ll_usb.c:1607:19:USB_ActivateEndpoint	16	static
 stm32f1xx_ll_usb.c:1692:19:USB_DeactivateEndpoint	8	static
 stm32f1xx_ll_usb.c:1833:19:USB_WritePacket	0	static
 stm32f1xx_ll_usb.c:1850:7:USB_ReadPacket	0	static
@@ -25,5 +25,5 @@ stm32f1xx_ll_usb.c:2065:19:USB_EP0_OutStart	0	static
 stm32f1xx_ll_usb.c:2079:19:USB_ActivateRemoteWakeup	0	static
 stm32f1xx_ll_usb.c:2091:19:USB_DeActivateRemoteWakeup	0	static
 stm32f1xx_ll_usb.c:2105:6:USB_WritePMA	8	static
-stm32f1xx_ll_usb.c:1745:19:USB_EPStartXfer	24	static
+stm32f1xx_ll_usb.c:1745:19:USB_EPStartXfer	16	static
 stm32f1xx_ll_usb.c:2131:6:USB_ReadPMA	8	static

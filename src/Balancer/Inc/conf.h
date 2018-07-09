@@ -16,9 +16,11 @@
 #include <stdlib.h>
 
 #include "adc.h"
+#include "i2c.h"
 
 // Sensors
-void sensorInit(void);
-int16_t cpuTemp(void);
+
+
+void Error_Handler(void);
 
 #endif /* CONF_H_ */

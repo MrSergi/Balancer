@@ -19,11 +19,11 @@ tasks.c:1779:12:xTaskGetTickCountFromISR	8	static
 tasks.c:1810:13:uxTaskGetNumberOfTasks	0	static
 tasks.c:1820:8:pcTaskGetTaskName	8	static
 tasks.c:1926:7:vTaskStepTick	8	static
-tasks.c:1939:12:xTaskIncrementTick	48	static
+tasks.c:1939:12:xTaskIncrementTick	40	static
 tasks.c:1671:12:xTaskResumeAll	32	static
 tasks.c:826:7:vTaskDelayUntil	16	static
 tasks.c:922:7:vTaskDelay	16	static
-tasks.c:2690:8:prvIdleTask	24	static
+tasks.c:2690:8:prvIdleTask	16	static
 tasks.c:1835:14:uxTaskGetSystemState	24	static
 tasks.c:2115:7:vTaskSetApplicationTaskTag	16	static
 tasks.c:2142:21:xTaskGetApplicationTaskTag	8	static
@@ -52,4 +52,4 @@ tasks.c:4014:13:xTaskNotifyWait	24	static
 tasks.c:4139:13:xTaskGenericNotify	24	static
 tasks.c:4245:13:xTaskGenericNotifyFromISR	32	static
 tasks.c:4362:7:vTaskNotifyGiveFromISR	24	static
-tasks.c:4444:13:xTaskNotifyStateClear	16	static
+tasks.c:4444:13:xTaskNotifyStateClear	8	static

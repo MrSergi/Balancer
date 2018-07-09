@@ -1,6 +1,7 @@
 #include "conf.h"
 #include "console.h"
 #include "adc.h"
+#include "sensors.h"
 
 /*****************************************************************************
  * Function:		ftoa
@@ -92,8 +93,11 @@ void cmdStatus(int argc, const char * const * argv)
 	ftoa(adc3, string);
 	fc_printf("ADC3:            %s V\r\n", string);
 
-	ftoa(cpuTemp() / 10.0f, string);
+	ftoa(SensGetTempCPU() / 10.0f, string);
 	fc_printf("CPU Temp:        %s deg C\r\n", string);
+
+	ftoa(AccSensor.Temp, string);
+	fc_printf("ACC Temp:        %s deg C\r\n", string);
 }
 
 /*****************************************************************************

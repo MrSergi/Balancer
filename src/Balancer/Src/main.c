@@ -4,39 +4,6 @@
   * Description        : Main program body
   ******************************************************************************
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
-  * All rights reserved.
-  *
-  * Redistribution and use in source and binary forms, with or without 
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice, 
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other 
-  *    contributors to this software may be used to endorse or promote products 
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this 
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under 
-  *    this license is void and will automatically terminate your rights under 
-  *    this license. 
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
   */
@@ -44,9 +11,12 @@
 #include "conf.h"
 #include "console.h"
 #include "usb_device.h"
+#include "sensors.h"
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+
+TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -58,7 +28,15 @@ void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
+static void MX_TIM1_Init(void);
 void StartDefaultTask(void const * argument);
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
+void User_PWM_SetPulseValue(uint16_t pulseValue)
+{
+	htim1.Instance->CCR2 = pulseValue;
+}
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -66,6 +44,7 @@ void StartDefaultTask(void const * argument);
 
 void microrl_run(void *pvParameters)
 {
+	consoleInit();
 	microrl_terminalInit();
 	while(1)
 	{
@@ -75,10 +54,24 @@ void microrl_run(void *pvParameters)
 
 void vLedTask (void *pvParameters)
 {
+	static uint16_t pulseValue = 0;
+	static int16_t step = 0;
+
     while(1)
     {
-    	vTaskDelay(periodBlink);
-    	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//    	vTaskDelay(periodBlink);
+
+        vTaskDelay(10);
+        if(pulseValue <= 0) step = 10;
+        if(pulseValue >= 1000) step = -10;
+        pulseValue += step;
+
+      /** OC_Config->Pulse means TIMx->CCRx;
+        * htim->Init->Period means TIMx->ARR;
+        * Duty ratio equals (CCRx / (ARR + 1))
+        * i.e. here equals (sConfigOC.Pulse / (htim4.Init.Period + 1))
+        */
+        User_PWM_SetPulseValue(pulseValue);
     }
 
     vTaskDelete(NULL);
@@ -86,9 +79,8 @@ void vLedTask (void *pvParameters)
 
 /* USER CODE END 0 */
 
-int main(void)
+portTASK_FUNCTION_PROTO(initTask, pvParameters)
 {
-
 	/* MCU Configuration----------------------------------------------------------*/
 
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -96,6 +88,55 @@ int main(void)
 
 	periodBlink = 100;
 
+	/* Configure the system clock */
+	SystemClock_Config();
+
+	__HAL_RCC_I2C2_CLK_ENABLE();
+	vTaskDelay(100);
+	__HAL_RCC_I2C2_FORCE_RESET();
+	vTaskDelay(100);
+	__HAL_RCC_I2C2_RELEASE_RESET();
+	vTaskDelay(100);
+
+	vTaskDelay(1000);
+
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_DMA_Init();
+	MX_ADC1_Init();
+	MX_TIM1_Init();
+	MX_I2C2_Init();
+	MX_USB_DEVICE_Init();
+
+//	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+
+	SensInit();
+
+	xTaskCreate(	vLedTask,"led",
+					100,
+					NULL,
+					tskIDLE_PRIORITY + 1, // —амый низкий приоритет после 0
+					NULL);
+
+	xTaskCreate(	microrl_run,"microrl",
+					500,
+					NULL,
+					tskIDLE_PRIORITY + 2,
+					NULL);
+
+	xTaskCreate(	SensorTask,"Sensor",
+					256,
+					NULL,
+					tskIDLE_PRIORITY + 3,
+					NULL);
+
+	/* Terminate initTask */
+	vTaskDelete(NULL);
+}
+
+int main(void)
+{
 //	/* Disable all interrupts */
 //	__set_PRIMASK(1);
 //
@@ -106,28 +147,8 @@ int main(void)
 //	/* Enable all interrupts */
 //	__set_PRIMASK(0);
 
-	/* Configure the system clock */
-	SystemClock_Config();
-
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_DMA_Init();
-	MX_ADC1_Init();
-	MX_USB_DEVICE_Init();
-
-	consoleInit();
-
-	xTaskCreate(	vLedTask,"led",
-					200,
-					NULL,
-					tskIDLE_PRIORITY + 1, // —амый низкий приоритет после 0
-					NULL);
-
-	xTaskCreate(	microrl_run,"microrl",
-					500,
-					NULL,
-					tskIDLE_PRIORITY + 2,
-					NULL);
+	//		   Task_func		       Task_name   Stack	    Param  Prio			   Handler
+	xTaskCreate(initTask, (signed char *) "Init",  128, (void *) NULL, 2, (xTaskHandle *) NULL);
 
 	/* «апуск шедулера, после чего созданные задачи начнут выполн€тьс€. */
 	vTaskStartScheduler();
@@ -141,7 +162,6 @@ int main(void)
 	for( ;; );
 
 	return 0;
-
 }
 
 /** System Clock Configuration
@@ -216,6 +236,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_RESET);
@@ -227,6 +248,73 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
+
+/* TIM1 init function */
+static void MX_TIM1_Init(void)
+{
+
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 720-1;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 1000-1;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_TIM_MspPostInit(&htim1);
+
+}
+
 
 /**
   * Enable DMA controller clock
@@ -266,9 +354,14 @@ void StartDefaultTask(void const * argument)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler */
+  static uint32_t delay = 0;
   /* User can add his own implementation to report the HAL error return state */
   while(1) 
   {
+	  for(delay = 0; delay < 1000000; delay++)
+		  continue;
+
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
   }
   /* USER CODE END Error_Handler */ 
 }

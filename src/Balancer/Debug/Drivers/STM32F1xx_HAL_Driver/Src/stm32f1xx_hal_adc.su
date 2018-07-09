@@ -20,7 +20,7 @@ stm32f1xx_hal_adc.c:768:19:HAL_ADC_Start	8	static
 stm32f1xx_hal_adc.c:1105:19:HAL_ADC_Start_IT	8	static
 stm32f1xx_hal_adc.c:1273:19:HAL_ADC_Start_DMA	24	static
 stm32f1xx_hal_adc.c:1989:19:ADC_ConversionStop_Disable	16	static
-stm32f1xx_hal_adc.c:374:19:HAL_ADC_Init	16	static
+stm32f1xx_hal_adc.c:374:19:HAL_ADC_Init	24	static
 stm32f1xx_hal_adc.c:575:19:HAL_ADC_DeInit	16	static
 stm32f1xx_hal_adc.c:881:19:HAL_ADC_Stop	8	static
 stm32f1xx_hal_adc.c:1216:19:HAL_ADC_Stop_IT	8	static
