@@ -14,6 +14,7 @@
 
 #include "conf.h"
 #include "lsm303dlhc.h"
+#include "l3gd20.h"
 
 //******************************************************************************
 //  Секция определения констант
@@ -35,11 +36,22 @@ typedef struct acc_sensor_t
 	float		Variance[3];			// Variance (degrees / second)
 } acc_sensor_t;
 
+typedef struct gyro_sensor_t {
+	uint32_t	SampleCount;			// Gyro sensor loop counter. Should be increased with 760 Hz freq (Gyro ODR).
+	uint32_t	OverrunCount;			// Gyro sensor data not abalible counter. Should be 0.
+	int16_t		Temp;					// Gyro sensor temperature in 0.1 degrees of celsius
+	float		DataDeg[3];			    // Gyro sensor data. Scaled to degrees / second
+	float		DataRad[3];			    // Gyro sensor data. Scaled to radian / second
+	float		Average[3];				// Average value (degrees / second)
+	float		Variance[3];			// Variance (degrees / second)
+} gyro_sensor_t;
+
 //******************************************************************************
 //  Секция определения глобальных переменных
 //******************************************************************************
 
 extern acc_sensor_t AccSensor;
+extern gyro_sensor_t GyroSensor;
 
 //******************************************************************************
 //  Секция прототипов глобальных функций

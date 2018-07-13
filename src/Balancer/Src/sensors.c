@@ -12,7 +12,8 @@
 // Глобальные
 //------------------------------------------------------------------------------
 
-acc_sensor_t AccSensor;				// Structure for real time accel sensor data
+acc_sensor_t AccSensor;			// Structure for real time accel sensor data
+gyro_sensor_t GyroSensor;		// Structure for real time gyro sensor data
 
 //------------------------------------------------------------------------------
 // Локальные
@@ -23,6 +24,7 @@ acc_sensor_t AccSensor;				// Structure for real time accel sensor data
 //******************************************************************************
 
 static void SensUpdateAcc(void);
+static void SensUpdateGyro(void);
 
 //******************************************************************************
 //  Секция описания функций (сначала глобальных, потом локальных)
@@ -52,7 +54,47 @@ int16_t SensGetTempCPU(void)
 *************************************************************/
 void SensInit(void)
 {
-	lsm303dlhcConfig();
+	uint8_t error = 0;
+
+	if (!l3gd20Detect())   // настраиваем гироскоп
+	{
+		// failureMode(3); // if this fails, we get a beep + blink pattern. we're doomed, no gyro or i2c error.
+		error = 1;
+	}
+
+	lsm303dlhcConfig();    // настраиваем акселерометр и магнетометр
+}
+
+/*************************************************************
+*  Function:       SensUpdateAcc
+*------------------------------------------------------------
+*  description:    Обновляем значения угловой скорости
+*                  от гироскопа по 3-м осям
+*  parameters:     void
+*  on return:      void
+*************************************************************/
+static void SensUpdateGyro(void)
+{
+	int16_t gyro[3];
+
+	l3gd20Read(gyro);
+
+	GyroSensor.DataDeg[0] = gyro[0] * 0.07f;    // Gyro FS=2000 dps, Sensitivity = 70 mdps/lsb (L3GD20);
+	GyroSensor.DataDeg[1] = gyro[1] * 0.07f;
+	GyroSensor.DataDeg[2] = gyro[2] * 0.07f;
+
+
+	static uint8_t temp_counter = 0;            // Temperature sensor refresh rate 1 Hz. Obtain through 20 cycles
+
+	if (temp_counter++ == 20)
+	{
+		int16_t t;
+
+		temp_counter = 0;
+
+		if (l3gd20GetTemp(&t))
+			GyroSensor.Temp = -7.87 * t + 332.3; // Convert to 0.1 degrees of Celcius
+	}
 }
 
 /*************************************************************
@@ -73,7 +115,7 @@ static void SensUpdateAcc(void)
 	AccSensor.DataMSS[1] = accel[1] * 0.0392266;  // acc_scale: 0,004 * 9,80665 = 0,0392266 (m/s2/lsb)
 	AccSensor.DataMSS[2] = accel[2] * 0.0392266;
 
-    static uint8_t TempCounter = 0;   // Temperature sensor refresh rate 1 Hz. Obtain through 20 cycles
+    static uint8_t TempCounter = 0;               // Temperature sensor refresh rate 1 Hz. Obtain through 20 cycles
 
     if (TempCounter++ == 20)
     {
@@ -83,7 +125,7 @@ static void SensUpdateAcc(void)
 
     	if (GetTemperature(&t))
     	{
-    		AccSensor.Temp = 1.149 * t + 170;	// Convert to 0.1 degrees of Celcius
+    		AccSensor.Temp = 1.149 * t + 170;	  // Convert to 0.1 degrees of Celcius
     	}
     }
 }
@@ -98,12 +140,13 @@ portTASK_FUNCTION_PROTO(SensorTask, pvParameters)
 
 	/* Sensors already initialized in main.c */
 
-	// Initialise the xLastWakeTime variable with the current time.
-	xLastWakeTime = xTaskGetTickCount();
+	xLastWakeTime = xTaskGetTickCount();     // Initialise the xLastWakeTime variable with the current time.
 
     while (1)
     {
     	SensUpdateAcc();                     // Read accel sensor data each cycle
+
+    	SensUpdateGyro();                    // Read gyro sensor data each cycle
 
 		vTaskDelayUntil(&xLastWakeTime, 50); // Wait for the next cycle. Task cycle time 50 ms.
     }

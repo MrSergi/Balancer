@@ -52,7 +52,16 @@ uint8_t i2cRead(uint8_t Addr, uint8_t Reg, uint8_t len, uint8_t* Data)
 	return result;
 }
 
-
+/*************************************************************
+*  Function:       i2cWrite
+*------------------------------------------------------------
+*  description:    «апись байта данных по шине I2C
+*  parameters:     Addr - адрес устройства
+*                  Reg - адрес регистра
+*                  Data - данные дл€ записи
+*  on return:      uint_8 - результат записи
+*                  1 - ошибка, 0 - успех
+*************************************************************/
 uint8_t i2cWrite(uint16_t Addr, uint8_t Reg, uint8_t Data)
 {
 	HAL_StatusTypeDef status = HAL_OK;

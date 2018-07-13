@@ -14,9 +14,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 #include "adc.h"
 #include "i2c.h"
+
+//typedef enum
+//{
+//  FALSE = 0, TRUE  = !FALSE
+//}
+//bool;
 
 // Sensors
 

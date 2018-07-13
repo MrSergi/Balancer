@@ -81,23 +81,26 @@ void cmdStatus(int argc, const char * const * argv)
 	ds2 = *(__IO uint32_t*)(0x1FFFF7F0);
 	fc_printf("MCU unique ID    %08lX%08lX%08lX\r\n", ds0, ds1, ds2);
 
-	float adc1 = (((float)adcGetChannel(0) * 3.309) / 4095.0) * 6.0;
-	ftoa(adc1, string);
-	fc_printf("ADC1:            %s V\r\n", string);
-
-	float adc2 = (((float)adcGetChannel(1) * 3.309) / 4095.0) * 6.0;
-	ftoa(adc2, string);
-	fc_printf("ADC2:            %s V\r\n", string);
-
-	float adc3 = (((float)adcGetChannel(2) * 3.309) / 4095.0) * 2.0;
-	ftoa(adc3, string);
-	fc_printf("ADC3:            %s V\r\n", string);
+//	float adc1 = (((float)adcGetChannel(0) * 3.309) / 4095.0) * 6.0;
+//	ftoa(adc1, string);
+//	fc_printf("ADC1:            %s V\r\n", string);
+//
+//	float adc2 = (((float)adcGetChannel(1) * 3.309) / 4095.0) * 6.0;
+//	ftoa(adc2, string);
+//	fc_printf("ADC2:            %s V\r\n", string);
+//
+//	float adc3 = (((float)adcGetChannel(2) * 3.309) / 4095.0) * 2.0;
+//	ftoa(adc3, string);
+//	fc_printf("ADC3:            %s V\r\n", string);
 
 	ftoa(SensGetTempCPU() / 10.0f, string);
-	fc_printf("CPU Temp:        %s deg C\r\n", string);
+	fc_printf("CPU temp:         %s deg C\r\n", string);
 
 	ftoa(AccSensor.Temp, string);
-	fc_printf("ACC Temp:        %s deg C\r\n", string);
+	fc_printf("Acc temp:         %s deg C\r\n", string);
+
+	ftoa(GyroSensor.Temp, string);
+	fc_printf("Gyro temp:        %s deg C\r\n", string);
 }
 
 /*****************************************************************************
