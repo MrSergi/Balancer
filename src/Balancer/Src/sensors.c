@@ -14,6 +14,8 @@
 
 acc_sensor_t AccSensor;			// Structure for real time accel sensor data
 gyro_sensor_t GyroSensor;		// Structure for real time gyro sensor data
+float pAngle = 0.0;				// «начение, пропорциональное углу отклонени€
+uint8_t period = 0;
 
 //------------------------------------------------------------------------------
 // Ћокальные
@@ -25,6 +27,7 @@ gyro_sensor_t GyroSensor;		// Structure for real time gyro sensor data
 
 static void SensUpdateAcc(void);
 static void SensUpdateGyro(void);
+static float clamp(float v, float minv, float maxv);
 
 //******************************************************************************
 //  —екци€ описани€ функций (сначала глобальных, потом локальных)
@@ -68,7 +71,7 @@ void SensInit(void)
 /*************************************************************
 *  Function:       SensUpdateAcc
 *------------------------------------------------------------
-*  description:    ќбновл€ем значени€ угловой скорости
+*  description:    ќбновл€ет значени€ угловой скорости
 *                  от гироскопа по 3-м ос€м
 *  parameters:     void
 *  on return:      void
@@ -83,10 +86,11 @@ static void SensUpdateGyro(void)
 	GyroSensor.DataDeg[1] = gyro[1] * 0.07f;
 	GyroSensor.DataDeg[2] = gyro[2] * 0.07f;
 
+	GyroSensor.Angle[0] = GyroSensor.Angle[0] + GyroSensor.DataDeg[0] * 0.02; // расчЄт угла отклонени€ по данным гироскопа
 
-	static uint8_t temp_counter = 0;            // Temperature sensor refresh rate 1 Hz. Obtain through 20 cycles
+	static uint8_t temp_counter = 0;            // Temperature sensor refresh rate 1 Hz. Obtain through 50 cycles
 
-	if (temp_counter++ == 20)
+	if (temp_counter++ == 50)
 	{
 		int16_t t;
 
@@ -97,10 +101,29 @@ static void SensUpdateGyro(void)
 	}
 }
 
+
+/*************************************************************
+*  Function:       clamp
+*------------------------------------------------------------
+*  description:    Ќе даЄт значению выйти за установленные пределы
+*  parameters:     v - провер€емое значение
+*                  minv - минимально возможное значение
+*                  maxv - максимально возможное значение
+*  on return:      float - значение после проверки
+*************************************************************/
+static float clamp(float v, float minv, float maxv)
+{
+   if(v > maxv)
+      return maxv;
+   else if(v < minv)
+      return minv;
+   return v;
+}
+
 /*************************************************************
 *  Function:       SensUpdateAcc
 *------------------------------------------------------------
-*  description:    ќбновл€ем значени€ ускорений от акселерометра
+*  description:    ќбновл€ет значени€ ускорений от акселерометра
 *                  по 3-м ос€м
 *  parameters:     void
 *  on return:      void
@@ -115,9 +138,15 @@ static void SensUpdateAcc(void)
 	AccSensor.DataMSS[1] = accel[1] * 0.0392266;  // acc_scale: 0,004 * 9,80665 = 0,0392266 (m/s2/lsb)
 	AccSensor.DataMSS[2] = accel[2] * 0.0392266;
 
-    static uint8_t TempCounter = 0;               // Temperature sensor refresh rate 1 Hz. Obtain through 20 cycles
+//	accel[1] = accel[1] * 0.004
 
-    if (TempCounter++ == 20)
+	AccSensor.Angle[0] = atan2f(accel[1] * 0.004, accel[2] * 0.004) * 180.0 / 3.1415; // вычисл€ем угол от акселерометра
+//	angle_ax = 90 - TO_DEG*acos(ay);
+//	AccSensor.Angle[0] = 90.0 - TO_DEG * acos(accel[1] * 0.004); // вычисл€ем угол наклона по акселерометру
+
+    static uint8_t TempCounter = 0;               // Temperature sensor refresh rate 1 Hz. Obtain through 50 cycles
+
+    if (TempCounter++ == 50)
     {
     	int16_t t;
 
@@ -137,6 +166,10 @@ static void SensUpdateAcc(void)
 portTASK_FUNCTION_PROTO(SensorTask, pvParameters)
 {
 	portTickType xLastWakeTime;
+	const float FK = 0.2;
+	uint32_t SysTime = 0;
+	static uint32_t pTime = 0;
+	uint32_t dTime = 1;
 
 	/* Sensors already initialized in main.c */
 
@@ -144,11 +177,30 @@ portTASK_FUNCTION_PROTO(SensorTask, pvParameters)
 
     while (1)
     {
-    	SensUpdateAcc();                     // Read accel sensor data each cycle
+//    	SensUpdateAcc();                     // Read accel sensor data each cycle
 
-    	SensUpdateGyro();                    // Read gyro sensor data each cycle
+//    	SensUpdateGyro();                    // Read gyro sensor data each cycle
 
-		vTaskDelayUntil(&xLastWakeTime, 50); // Wait for the next cycle. Task cycle time 50 ms.
+//    	pAngle = GyroSensor.Angle[0] * (1.0 - FK) + AccSensor.Angle[0] * FK;
+    	//angle_gx = angle_gx*(1-FK) + angle_ax*FK;
+		//pAngle=0.98*(pAngle+gyroAngle)+0.02*accAngle-desiredAngle;               // Complementary filter yields best value for current angle
+
+//		if(period)
+//			period = 0;
+//		else
+//			period = 10;
+//
+//		SysTime = HAL_GetTick();
+//    	dTime = SysTime - pTime;
+//    	pTime = SysTime;
+
+//    	HAL_Delay(1000); // задержка в 1000 мс
+    	vTaskDelay(1000);
+//    	CDC_Transmit_FS(&dTime, 4);
+
+    	vTaskDelayUntil(&xLastWakeTime, 1000); // Wait for the next cycle. Task cycle time 20 ms.
+//		vTaskDelay(1000);
+//		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     }
 }
 

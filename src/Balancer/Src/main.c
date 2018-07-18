@@ -21,6 +21,7 @@ TIM_HandleTypeDef htim1;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 volatile uint32_t periodBlink;
+volatile uint32_t sysTickUptime = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,6 +83,7 @@ void vLedTask (void *pvParameters)
 portTASK_FUNCTION_PROTO(initTask, pvParameters)
 {
 	/* MCU Configuration----------------------------------------------------------*/
+	uint32_t sysclock = 0;
 
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
@@ -99,6 +101,8 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 	vTaskDelay(100);
 
 	vTaskDelay(1000);
+
+	sysclock = HAL_RCC_GetSysClockFreq();
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
@@ -119,11 +123,11 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
 					NULL);
 
-	xTaskCreate(	microrl_run,"microrl",
-					500,
-					NULL,
-					tskIDLE_PRIORITY + 2,
-					NULL);
+//	xTaskCreate(	microrl_run,"microrl",
+//					500,
+//					NULL,
+//					tskIDLE_PRIORITY + 2,
+//					NULL);
 
 	xTaskCreate(	SensorTask,"Sensor",
 					256,
@@ -364,6 +368,26 @@ void Error_Handler(void)
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
   }
   /* USER CODE END Error_Handler */ 
+}
+
+/*************************************************************
+*  Function:       micros
+*------------------------------------------------------------
+*  description:    Считывает время безотказной работы системы в
+*                  микросекундах (70 минут)
+*  parameters:     void
+*  on return:      uint32_t - системное время в микросекундах
+*************************************************************/
+uint32_t micros(void)
+{
+	register uint32_t ms, cycle_cnt;
+    do
+    {
+        ms = sysTickUptime;
+        cycle_cnt = SysTick->VAL;
+    } while (ms != sysTickUptime);
+
+    return ((float)ms * 1000.0) + (72000.0 - (float)cycle_cnt) / 72.0;
 }
 
 /*******************************************************************************

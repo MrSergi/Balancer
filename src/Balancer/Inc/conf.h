@@ -15,7 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <math.h>
 
 #include "adc.h"
 #include "i2c.h"
@@ -28,7 +28,7 @@
 
 // Sensors
 
-
+uint32_t micros(void);
 void Error_Handler(void);
 
 #endif /* CONF_H_ */

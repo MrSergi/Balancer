@@ -15,11 +15,13 @@
 #include "conf.h"
 #include "lsm303dlhc.h"
 #include "l3gd20.h"
+#include "usbd_cdc_if.h"
 
 //******************************************************************************
 //  Секция определения констант
 //******************************************************************************
 
+#define TO_DEG 57.29577951308232087679815481410517033f
 
 //******************************************************************************
 //  Секция определения типов
@@ -34,6 +36,7 @@ typedef struct acc_sensor_t
 	float		DataMW[3];				// Accel sensor data scaled to MultiWii
 	float		Average[3];				// Average value (degrees / second)
 	float		Variance[3];			// Variance (degrees / second)
+	float		Angle[3];				// Угол отклонения (градус)
 } acc_sensor_t;
 
 typedef struct gyro_sensor_t {
@@ -44,6 +47,7 @@ typedef struct gyro_sensor_t {
 	float		DataRad[3];			    // Gyro sensor data. Scaled to radian / second
 	float		Average[3];				// Average value (degrees / second)
 	float		Variance[3];			// Variance (degrees / second)
+	float		Angle[3];				// Угол отклонения (градус)
 } gyro_sensor_t;
 
 //******************************************************************************
@@ -52,6 +56,7 @@ typedef struct gyro_sensor_t {
 
 extern acc_sensor_t AccSensor;
 extern gyro_sensor_t GyroSensor;
+extern float pAngle;
 
 //******************************************************************************
 //  Секция прототипов глобальных функций
