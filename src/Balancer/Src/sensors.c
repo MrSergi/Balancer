@@ -16,6 +16,7 @@ acc_sensor_t AccSensor;			// Structure for real time accel sensor data
 gyro_sensor_t GyroSensor;		// Structure for real time gyro sensor data
 float pAngle = 0.0;				// Значение, пропорциональное углу отклонения
 uint8_t period = 0;
+float GyroAngleX = 0.0;			// Значение, пропорциональное углу отклонения от гироскопа
 
 //------------------------------------------------------------------------------
 // Локальные
@@ -69,40 +70,6 @@ void SensInit(void)
 }
 
 /*************************************************************
-*  Function:       SensUpdateAcc
-*------------------------------------------------------------
-*  description:    Обновляет значения угловой скорости
-*                  от гироскопа по 3-м осям
-*  parameters:     void
-*  on return:      void
-*************************************************************/
-static void SensUpdateGyro(void)
-{
-	int16_t gyro[3];
-
-	l3gd20Read(gyro);
-
-	GyroSensor.DataDeg[0] = gyro[0] * 0.07f;    // Gyro FS=2000 dps, Sensitivity = 70 mdps/lsb (L3GD20);
-	GyroSensor.DataDeg[1] = gyro[1] * 0.07f;
-	GyroSensor.DataDeg[2] = gyro[2] * 0.07f;
-
-	GyroSensor.Angle[0] = GyroSensor.Angle[0] + GyroSensor.DataDeg[0] * 0.02; // расчёт угла отклонения по данным гироскопа
-
-	static uint8_t temp_counter = 0;            // Temperature sensor refresh rate 1 Hz. Obtain through 50 cycles
-
-	if (temp_counter++ == 50)
-	{
-		int16_t t;
-
-		temp_counter = 0;
-
-		if (l3gd20GetTemp(&t))
-			GyroSensor.Temp = -7.87 * t + 332.3; // Convert to 0.1 degrees of Celcius
-	}
-}
-
-
-/*************************************************************
 *  Function:       clamp
 *------------------------------------------------------------
 *  description:    Не даёт значению выйти за установленные пределы
@@ -123,6 +90,67 @@ static float clamp(float v, float minv, float maxv)
 /*************************************************************
 *  Function:       SensUpdateAcc
 *------------------------------------------------------------
+*  description:    Обновляет значения угловой скорости
+*                  от гироскопа по 3-м осям
+*  parameters:     void
+*  on return:      void
+*************************************************************/
+static void SensUpdateGyro(void)
+{
+	int16_t gyro[3];
+	uint8_t xSign;
+
+	l3gd20Read(gyro);
+
+	GyroSensor.DataDeg[X] = (float)gyro[X] * 0.07f;    // Gyro FS=2000 dps, Sensitivity = 70 mdps/lsb (L3GD20);
+	GyroSensor.DataDeg[Y] = (float)gyro[Y] * 0.07f;
+	GyroSensor.DataDeg[Z] = (float)gyro[Z] * 0.07f;
+
+	if((gyro[0] & 0x8000) == 0)
+	{
+		xSign = 0;
+	}
+	else
+	{
+		xSign = 1;
+		gyro[X] &= 0x7FFF;
+		gyro[X] = 0x8000 - gyro[0];
+	}
+
+	if(abs(gyro[X]) < 0x0A)
+	{
+		gyro[X] = 0;
+	}
+
+	if(xSign == 0)
+	{
+		GyroSensor.Angle[X] = (float)gyro[X] * 0.07f;
+	}
+	else
+	{
+		GyroSensor.Angle[X] = (-1) * (float)gyro[X] * 0.07f;
+	}
+
+	//GyroSensor.DataDeg[0] = (float)gyro[0] * 0.07f;    // Gyro FS=2000 dps, Sensitivity = 70 mdps/lsb (L3GD20);
+
+	//GyroSensor.Angle[0] += GyroSensor.DataDeg[0] * 0.02f; // расчёт угла отклонения по данным гироскопа
+
+	static uint8_t temp_counter = 0;            // Temperature sensor refresh rate 1 Hz. Obtain through 50 cycles
+
+	if (temp_counter++ == 50)
+	{
+		int16_t t;
+
+		temp_counter = 0;
+
+		if (l3gd20GetTemp(&t))
+			GyroSensor.Temp = -7.87 * t + 332.3; // Convert to 0.1 degrees of Celcius
+	}
+}
+
+/*************************************************************
+*  Function:       SensUpdateAcc
+*------------------------------------------------------------
 *  description:    Обновляет значения ускорений от акселерометра
 *                  по 3-м осям
 *  parameters:     void
@@ -134,15 +162,14 @@ static void SensUpdateAcc(void)
 
 	lsm303dlhcReadAcc(accel);
 
-	AccSensor.DataMSS[0] = accel[0] * 0.0392266;  // Scale to the m/s2.
-	AccSensor.DataMSS[1] = accel[1] * 0.0392266;  // acc_scale: 0,004 * 9,80665 = 0,0392266 (m/s2/lsb)
-	AccSensor.DataMSS[2] = accel[2] * 0.0392266;
+	AccSensor.DataMSS[0] = (float)accel[0] * 0.0392266;  // Scale to the m/s2.
+	AccSensor.DataMSS[1] = (float)accel[1] * 0.0392266;  // acc_scale: 0,004 * 9,80665 = 0,0392266 (m/s2/lsb)
+	AccSensor.DataMSS[2] = (float)accel[2] * 0.0392266;
 
-//	accel[1] = accel[1] * 0.004
+	AccSensor.Angle[Y] = (-1.0f) * atan2((float)accel[Z], (float)accel[X]) * RAD_TO_DEG + 90.0f; // вычисляем угол от акселерометра
 
-	AccSensor.Angle[0] = atan2f(accel[1] * 0.004, accel[2] * 0.004) * 180.0 / 3.1415; // вычисляем угол от акселерометра
-//	angle_ax = 90 - TO_DEG*acos(ay);
-//	AccSensor.Angle[0] = 90.0 - TO_DEG * acos(accel[1] * 0.004); // вычисляем угол наклона по акселерометру
+//	if (AccSensor.Angle[0] > 180.0)
+//	    AccSensor.Angle[0] -= 360;
 
     static uint8_t TempCounter = 0;               // Temperature sensor refresh rate 1 Hz. Obtain through 50 cycles
 
@@ -166,41 +193,22 @@ static void SensUpdateAcc(void)
 portTASK_FUNCTION_PROTO(SensorTask, pvParameters)
 {
 	portTickType xLastWakeTime;
-	const float FK = 0.2;
-	uint32_t SysTime = 0;
-	static uint32_t pTime = 0;
-	uint32_t dTime = 1;
-
-	/* Sensors already initialized in main.c */
+	const float FK = 0.1;
+	                                         /* Sensors already initialized in main.c */
 
 	xLastWakeTime = xTaskGetTickCount();     // Initialise the xLastWakeTime variable with the current time.
 
     while (1)
     {
-//    	SensUpdateAcc();                     // Read accel sensor data each cycle
+    	SensUpdateGyro();                    // Read gyro sensor data each cycle
 
-//    	SensUpdateGyro();                    // Read gyro sensor data each cycle
+    	SensUpdateAcc();                     // Read accel sensor data each cycle
 
-//    	pAngle = GyroSensor.Angle[0] * (1.0 - FK) + AccSensor.Angle[0] * FK;
-    	//angle_gx = angle_gx*(1-FK) + angle_ax*FK;
-		//pAngle=0.98*(pAngle+gyroAngle)+0.02*accAngle-desiredAngle;               // Complementary filter yields best value for current angle
+    	GyroAngleX += GyroSensor.Angle[X] * 0.015f;
 
-//		if(period)
-//			period = 0;
-//		else
-//			period = 10;
-//
-//		SysTime = HAL_GetTick();
-//    	dTime = SysTime - pTime;
-//    	pTime = SysTime;
+    	pAngle = (pAngle + GyroSensor.Angle[X] * 0.015f) * (1.0 - FK) + AccSensor.Angle[Y] * FK;
 
-//    	HAL_Delay(1000); // задержка в 1000 мс
-    	vTaskDelay(1000);
-//    	CDC_Transmit_FS(&dTime, 4);
-
-    	vTaskDelayUntil(&xLastWakeTime, 1000); // Wait for the next cycle. Task cycle time 20 ms.
-//		vTaskDelay(1000);
-//		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    	vTaskDelayUntil(&xLastWakeTime, 15); // Wait for the next cycle. Task cycle time 20 ms.
     }
 }
 

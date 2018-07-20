@@ -78,6 +78,40 @@ void vLedTask (void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void DebugTask (void *pvParameters)
+{
+	uint8_t TxData[50];
+	uint8_t NByte;
+	int16_t AccAngle;
+	int16_t GyroAngle;
+	int16_t Angle;
+
+    while(1)
+    {
+    	NByte = 0;
+    	Angle = (int16_t)pAngle;
+    	AccAngle = (int16_t)AccSensor.Angle[Y];
+    	GyroAngle = (int16_t)GyroAngleX;
+
+    	TxData[NByte++] = 0x12;
+    	TxData[NByte++] = Angle & 0xFF;
+    	TxData[NByte++] = Angle >> 8;
+    	TxData[NByte++] = 0x10;
+    	TxData[NByte++] = AccAngle & 0xFF;
+    	TxData[NByte++] = AccAngle >> 8;
+    	TxData[NByte++] = 0x10;
+    	TxData[NByte++] = GyroAngle & 0xFF;
+    	TxData[NByte++] = GyroAngle >> 8;
+    	TxData[NByte++] = 0x13;
+
+    	CDC_Transmit_FS(TxData, NByte);
+
+    	vTaskDelay(150);
+    }
+
+    vTaskDelete(NULL);
+}
+
 /* USER CODE END 0 */
 
 portTASK_FUNCTION_PROTO(initTask, pvParameters)
@@ -106,34 +140,41 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	MX_DMA_Init();
-	MX_ADC1_Init();
-	MX_TIM1_Init();
+//	MX_DMA_Init();
+//	MX_ADC1_Init();
+//	MX_TIM1_Init();
 	MX_I2C2_Init();
 	MX_USB_DEVICE_Init();
 
 //	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+//	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 
 	SensInit();
 
-	xTaskCreate(	vLedTask,"led",
-					100,
+	xTaskCreate(	SensorTask,"sensor",
+					256,
 					NULL,
 					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
 					NULL);
 
-//	xTaskCreate(	microrl_run,"microrl",
-//					500,
+	xTaskCreate(	DebugTask,"debug",
+					100,
+					NULL,
+					tskIDLE_PRIORITY + 2,
+					NULL);
+
+//	xTaskCreate(	vLedTask,"led",
+//					100,
 //					NULL,
 //					tskIDLE_PRIORITY + 2,
 //					NULL);
 
-	xTaskCreate(	SensorTask,"Sensor",
-					256,
-					NULL,
-					tskIDLE_PRIORITY + 3,
-					NULL);
+//	xTaskCreate(	microrl_run,"microrl",
+//					500,
+//					NULL,
+//					tskIDLE_PRIORITY + 3,
+//					NULL);
+
 
 	/* Terminate initTask */
 	vTaskDelete(NULL);

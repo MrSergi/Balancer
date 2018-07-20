@@ -1,2 +1,2 @@
-adc.c:16:6:MX_ADC1_Init	24	static
-adc.c:89:10:adcGetChannel	16	static
+adc.c:16:6:MX_ADC1_Init	32	static
+adc.c:89:10:adcGetChannel	0	static
