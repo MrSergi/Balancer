@@ -9,6 +9,7 @@
 #include "semphr.h"
 #include "cmsis_os.h"
 #include "microrl.h"
+#include "uart.h"
 
 #include "main.h"
 #include <stdarg.h>
@@ -223,6 +224,7 @@ void consoleInput(uint8_t* Buf, uint32_t Len)
 // print to stream callback
 void microrl_sendString (const char * str)
 {
-	CDC_Transmit_FS((uint8_t *)str, strlen(str));
+//	CDC_Transmit_FS((uint8_t *)str, strlen(str));
+	UART_SendString((const char *) str);
 	vTaskDelay(1);
 }

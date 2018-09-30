@@ -1,6 +1,6 @@
-sensors.c:43:9:SensGetTempCPU	32	static
-sensors.c:58:6:SensInit	16	static
-sensors.c:79:13:SensUpdateGyro	32	static
-sensors.c:114:14:clamp	24	static
-sensors.c:131:13:SensUpdateAcc	32	static
-sensors.c:166:1:SensorTask	32	static
+sensors.c:58:9:SensGetTempCPU	32	static
+sensors.c:73:6:SensInit	16	static
+sensors.c:95:14:clamp	24	static
+sensors.c:112:13:SensUpdateGyro	32	static
+sensors.c:173:13:SensUpdateAcc	40	static
+sensors.c:207:1:SensorTask	32	static

@@ -4,7 +4,7 @@
   * @brief   Interrupt Service Routines.
   ******************************************************************************
   *
-  * COPYRIGHT(c) 2017 STMicroelectronics
+  * COPYRIGHT(c) 2018 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -43,6 +43,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
 extern DMA_HandleTypeDef hdma_adc1;
+extern UART_HandleTypeDef huart1;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -71,6 +72,8 @@ void HardFault_Handler(void)
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* USER CODE END W1_HardFault_IRQn 0 */
   }
   /* USER CODE BEGIN HardFault_IRQn 1 */
 
@@ -87,6 +90,8 @@ void MemManage_Handler(void)
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
+    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+    /* USER CODE END W1_MemoryManagement_IRQn 0 */
   }
   /* USER CODE BEGIN MemoryManagement_IRQn 1 */
 
@@ -103,6 +108,8 @@ void BusFault_Handler(void)
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
+    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+    /* USER CODE END W1_BusFault_IRQn 0 */
   }
   /* USER CODE BEGIN BusFault_IRQn 1 */
 
@@ -119,6 +126,8 @@ void UsageFault_Handler(void)
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {
+    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+    /* USER CODE END W1_UsageFault_IRQn 0 */
   }
   /* USER CODE BEGIN UsageFault_IRQn 1 */
 
@@ -147,7 +156,6 @@ void SysTick_Handler(void)
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
-//  HAL_SYSTICK_IRQHandler();
   osSystickHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
@@ -188,6 +196,20 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 
   /* USER CODE END USB_LP_CAN1_RX0_IRQn 1 */
 }
+
+/**
+* @brief This function handles USART1 global interrupt.
+*/
+//void USART1_IRQHandler(void)
+//{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+//  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
+//}
 
 /* USER CODE BEGIN 1 */
 

@@ -12,36 +12,48 @@
 #include "console.h"
 #include "usb_device.h"
 #include "sensors.h"
+#include "motor.h"
 
-/* Private variables ---------------------------------------------------------*/
+
+
+//******************************************************************************
+//  Секция определения переменных, используемых в модуле
+//******************************************************************************
+
+//------------------------------------------------------------------------------
+// Глобальные
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Локальные
+//------------------------------------------------------------------------------
+
 osThreadId defaultTaskHandle;
-
 TIM_HandleTypeDef htim1;
 
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
 volatile uint32_t periodBlink;
 volatile uint32_t sysTickUptime = 0;
-/* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*/
+//******************************************************************************
+//  Секция прототипов локальных функций
+//******************************************************************************
 void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
 void StartDefaultTask(void const * argument);
-
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
+//******************************************************************************
+//  Секция описания функций (сначала глобальных, потом локальных)
+//******************************************************************************
 
 void User_PWM_SetPulseValue(uint16_t pulseValue)
 {
 	htim1.Instance->CCR2 = pulseValue;
 }
-
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
 
 void microrl_run(void *pvParameters)
 {
@@ -78,12 +90,47 @@ void vLedTask (void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void DebugTask (void *pvParameters)
+{
+	uint8_t TxData[50];
+	uint8_t NByte;
+	int16_t AccAngle;
+	int16_t GyroAngle;
+	int16_t Angle;
+
+    while(1)
+    {
+    	NByte = 0;
+    	Angle = (int16_t)pAngle;
+    	AccAngle = direction;//(int16_t)AccSensor.Angle[Y];
+    	GyroAngle = (int16_t)(DriveSpeed * 10.0);//(int16_t)GyroAngleX;
+
+    	TxData[NByte++] = 0x12;
+    	TxData[NByte++] = Angle & 0xFF;
+    	TxData[NByte++] = Angle >> 8;
+    	TxData[NByte++] = 0x10;
+    	TxData[NByte++] = AccAngle & 0xFF;
+    	TxData[NByte++] = AccAngle >> 8;
+    	TxData[NByte++] = 0x10;
+    	TxData[NByte++] = GyroAngle & 0xFF;
+    	TxData[NByte++] = GyroAngle >> 8;
+    	TxData[NByte++] = 0x13;
+
+//    	CDC_Transmit_FS(TxData, NByte);
+
+    	vTaskDelay(150);
+    }
+
+    vTaskDelete(NULL);
+}
+
 /* USER CODE END 0 */
 
 portTASK_FUNCTION_PROTO(initTask, pvParameters)
 {
 	/* MCU Configuration----------------------------------------------------------*/
-	uint32_t sysclock = 0;
+//	uint32_t sysclock = 0;
+//	int speed = 0;
 
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
@@ -102,38 +149,53 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 
 	vTaskDelay(1000);
 
-	sysclock = HAL_RCC_GetSysClockFreq();
+//	sysclock = HAL_RCC_GetSysClockFreq();
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_ADC1_Init();
-	MX_TIM1_Init();
+//	MX_TIM1_Init();
 	MX_I2C2_Init();
 	MX_USB_DEVICE_Init();
+	UART_Init();
 
 //	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+//	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 
 	SensInit();
 
-	xTaskCreate(	vLedTask,"led",
+	MotorCtrlDrive(0.0);           // Отключаем управление моторами на 5 сек.
+	vTaskDelay(1000);
+
+
+
+//	xTaskCreate(	SensorTask,"sensor",
+//					256,
+//					NULL,
+//					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
+//					NULL);
+
+#ifdef DEBUG
+	xTaskCreate(	DebugTask,"debug",
 					100,
 					NULL,
-					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
+					tskIDLE_PRIORITY + 2,
 					NULL);
+#endif
 
-//	xTaskCreate(	microrl_run,"microrl",
-//					500,
+//	xTaskCreate(	vLedTask,"led",
+//					100,
 //					NULL,
 //					tskIDLE_PRIORITY + 2,
 //					NULL);
 
-	xTaskCreate(	SensorTask,"Sensor",
-					256,
+	xTaskCreate(	microrl_run,"microrl",
+					500,
 					NULL,
 					tskIDLE_PRIORITY + 3,
 					NULL);
+
 
 	/* Terminate initTask */
 	vTaskDelete(NULL);
@@ -250,6 +312,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PB6 PB7 PB8 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

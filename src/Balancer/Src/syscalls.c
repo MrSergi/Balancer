@@ -10,6 +10,7 @@
 #include <errno.h>
 //#include "usbd_cdc_vcp.h"
 #include "usbd_cdc_if.h"
+#include "uart.h"
 
 #undef errno
 extern int errno;
@@ -81,7 +82,8 @@ int _write(int file, char *ptr, int len)
 //	VCP_DataTx((uint8_t *) ptr, len);
 	volatile uint32_t counter = 0;
 
-	CDC_Transmit_FS((uint8_t *) ptr, len);
+//	CDC_Transmit_FS((uint8_t *) ptr, len);
+	UART_SendString((const char *) ptr);
 
 	for(counter = 0; counter < 1000000; counter ++) // временная задержка
 		continue;

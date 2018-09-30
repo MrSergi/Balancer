@@ -119,7 +119,7 @@
 #define configUSE_APPLICATION_TASK_TAG           1
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configGENERATE_RUN_TIME_STATS            1
-#define configUSE_ALTERNATIVE_API                1   /* Deprecated! */
+#define configUSE_ALTERNATIVE_API                0   /* Deprecated! */
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  1
 #define configUSE_TICKLESS_IDLE                  1
 
