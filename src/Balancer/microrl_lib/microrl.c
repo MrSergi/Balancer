@@ -527,8 +527,7 @@ static void microrl_get_complite (microrl_t * pThis)
 #endif
 
 //*****************************************************************************
-void new_line_handler(microrl_t * pThis)
-{
+void new_line_handler(microrl_t * pThis){
 	char const * tkn_arr [_COMMAND_TOKEN_NMB];
 	int status;
 
@@ -559,16 +558,12 @@ void new_line_handler(microrl_t * pThis)
 void microrl_insert_char (microrl_t * pThis, int ch)
 {
 #ifdef _USE_ESC_SEQ
-	if (pThis->escape)
-	{
+	if (pThis->escape) {
 		if (escape_process(pThis, ch))
 			pThis->escape = 0;
-	}
-	else
-	{
+	} else {
 #endif
-		switch (ch)
-		{
+		switch (ch) {
 			//-----------------------------------------------------
 #ifdef _ENDL_CR
 			case KEY_CR:
@@ -613,8 +608,7 @@ void microrl_insert_char (microrl_t * pThis, int ch)
 			break;
 			//-----------------------------------------------------
 			case KEY_NAK: // ^U
-				while (pThis->cursor > 0)
-				{
+					while (pThis->cursor > 0) {
 					microrl_backspace (pThis);
 				}
 				terminal_print_line (pThis, 0, pThis->cursor);

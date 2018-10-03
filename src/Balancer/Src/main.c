@@ -10,11 +10,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "conf.h"
 #include "console.h"
-#include "usb_device.h"
 #include "sensors.h"
 #include "motor.h"
-
-
 
 //******************************************************************************
 //  Секция определения переменных, используемых в модуле
@@ -157,7 +154,6 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 	MX_ADC1_Init();
 //	MX_TIM1_Init();
 	MX_I2C2_Init();
-	MX_USB_DEVICE_Init();
 	UART_Init();
 
 //	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
@@ -170,11 +166,11 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 
 
 
-//	xTaskCreate(	SensorTask,"sensor",
-//					256,
-//					NULL,
-//					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
-//					NULL);
+	xTaskCreate(	SensorTask,"sensor",
+					256,
+					NULL,
+					tskIDLE_PRIORITY + 1, // Самый низкий приоритет после 0
+					NULL);
 
 #ifdef DEBUG
 	xTaskCreate(	DebugTask,"debug",
@@ -214,7 +210,7 @@ int main(void)
 //	__set_PRIMASK(0);
 
 	//		   Task_func		       Task_name   Stack	    Param  Prio			   Handler
-	xTaskCreate(initTask, (signed char *) "Init",  128, (void *) NULL, 2, (xTaskHandle *) NULL);
+	xTaskCreate(initTask, (const char *) "Init",  128, (void *) NULL, 2, (xTaskHandle *) NULL);
 
 	/* Запуск шедулера, после чего созданные задачи начнут выполняться. */
 	vTaskStartScheduler();
@@ -404,21 +400,6 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
-}
-
-/* StartDefaultTask function */
-void StartDefaultTask(void const * argument)
-{
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
-
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */ 
 }
 
 /**

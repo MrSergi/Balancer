@@ -1,5 +1,10 @@
-﻿#include <string.h>				// for strcmp, strstr
+﻿//******************************************************************************
+//  Секция include: здесь подключается заголовочный файл к модулю
+//******************************************************************************
+#include <string.h>				// for strcmp, strstr
 #include <stdio.h>
+#include <stdarg.h>
+
 #include "console.h"
 #include "stm32f1xx_hal.h"
 #include "usb_device.h"
@@ -11,12 +16,18 @@
 #include "microrl.h"
 #include "uart.h"
 
-#include "main.h"
-#include <stdarg.h>
+//******************************************************************************
+//  Секция определения переменных, используемых в модуле
+//******************************************************************************
 
-//Define this macros with correct write/read terminal functions
-//#define microrl_getChar			USB_GetChar
-//#define microrl_sendString		USB_SendString
+//------------------------------------------------------------------------------
+// Глобальные
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Локальные
+//------------------------------------------------------------------------------
 
 /* The queue used to store command line. */
 static xQueueHandle xQueueCmdBuffer = NULL;
@@ -24,17 +35,37 @@ static xQueueHandle xQueueCmdBuffer = NULL;
 microrl_t rl;					// Main terminal object
 microrl_t * prl = &rl;
 
+const console_cmd_t cmd_keyworld[] =
+{
+	{ "help",		&cmdHelp 			},
+	{ "clear",		&cmdClear 			},
+	{ "status",		&cmdStatus 			},
+	{ "pid",		&cmdPIDSetup		},
+};
+
+#define _NUM_OF_CMD 	(sizeof(cmd_keyworld) / sizeof(cmd_keyworld[0]))
+
+// array for comletion
+char * compl_world [_NUM_OF_CMD + 1];
+
+//******************************************************************************
+//  Секция прототипов локальных функций
+//******************************************************************************
+
 void microrl_sendString (const char * str);
-
-static void cmdHelp(int argc, const char * const * argv);
-
 static int prv_execute(int argc, const char * const * argv);
+
 #ifdef _USE_COMPLETE
 static char ** prv_complet (int argc, const char * const * argv);
 #endif
+
 #ifdef _USE_CTLR_C
 static void prv_sigint (void);
 #endif
+
+//******************************************************************************
+//  Секция описания функций (сначала глобальных, потом локальных)
+//******************************************************************************
 
 void consoleInit(void)
 {
@@ -54,6 +85,7 @@ void microrl_terminalInit()
 	microrl_set_sigint_callback (prl, prv_sigint);
 	#endif
 }
+
 void microrl_terminalProcess()
 {
 	uint8_t ch;
@@ -106,26 +138,7 @@ int fc_printf(const char * fmt, ...)
     return n;
 }
 
-/* Таблица команд консоли */
-typedef struct _console_cmd_t
-{
-	char * name;				/* Имя команды */
-	void   (*console_cmd)(); 	/* Указатель на функцию команды консоли */
-} console_cmd_t;
-
-static const console_cmd_t cmd_keyworld[] =
-{
-	{ "help",		&cmdHelp 			},
-	{ "clear",		&cmdClear 			},
-	{ "status",		&cmdStatus 			},
-};
-
-#define _NUM_OF_CMD 	(sizeof(cmd_keyworld) / sizeof(cmd_keyworld[0]))
-
-// array for comletion
-char * compl_world [_NUM_OF_CMD + 1];
-
-static void cmdHelp(int argc, const char * const * argv)
+void cmdHelp(int argc, const char * const * argv)
 {
     uint32_t i = 0;
 
@@ -198,7 +211,7 @@ static void prv_sigint (void)
 #endif
 
 //*****************************************************************************
-//	Обработчик прерывания по приходу данных по USB
+//	Обработчик прерывания по приходу данных
 void consoleInput(uint8_t* Buf, uint32_t Len)
 {
 	uint32_t i;
@@ -216,7 +229,6 @@ void consoleInput(uint8_t* Buf, uint32_t Len)
 		}
 	}
 
-//	HAL_GPIO_TogglePin(LED_ERR_GPIO_Port, LED_ERR_Pin);
 	/* Now the buffer is empty we can switch context if necessary. */
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -225,6 +237,10 @@ void consoleInput(uint8_t* Buf, uint32_t Len)
 void microrl_sendString (const char * str)
 {
 //	CDC_Transmit_FS((uint8_t *)str, strlen(str));
-	UART_SendString((const char *) str);
-	vTaskDelay(1);
+//	vTaskDelay(1);                                     // задержка при использовании предачи через VCP
+	UART_SendString((const char *)str, strlen(str));
 }
+
+//******************************************************************************
+//  ENF OF FILE
+//******************************************************************************

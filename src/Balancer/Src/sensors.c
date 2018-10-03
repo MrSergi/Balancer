@@ -23,9 +23,9 @@ float DriveSpeed = 0.0;         // Variable for motor speed
 // Локальные
 //------------------------------------------------------------------------------
 
-const float kp = 1;   //40                       // 145 Proportional gain kU 400-500
-const float kd = 1;   //2 was quite good        // Derivative gain
-const float ki = 1;    //30                     // Integrative gain
+float kp = 1;   //40                              // 145 Proportional gain kU 400-500
+float kd = 0;   //2 was quite good                // Derivative gain
+float ki = 0;   //30                              // Integrative gain
 float OVERALL_SCALAR = 170;                       // Overall scalar that speed is divided by
 //float accBias = 0;                              // Accelerometer Bias
 //float gyroBias = 0;                             // Gyro Bias
@@ -235,8 +235,10 @@ portTASK_FUNCTION_PROTO(SensorTask, pvParameters)
         	   if(DriveSpeed > 1.0)
         		   DriveSpeed = 1.0;                                                 // Cap if overshoot
         }
-           else
+        else
+        {
         	   DriveSpeed = 0;                                                     // If we've fallen over or are steady on top
+        }
 
         MotorCtrlDrive(DriveSpeed);                                                // Write speed to the motors
 

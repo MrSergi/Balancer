@@ -15,7 +15,6 @@
 #include "conf.h"
 #include "lsm303dlhc.h"
 #include "l3gd20.h"
-#include "usbd_cdc_if.h"
 #include "motor.h"
 
 //******************************************************************************
@@ -69,6 +68,9 @@ extern gyro_sensor_t GyroSensor;
 extern float pAngle;
 extern float GyroAngleX;
 extern float DriveSpeed;
+extern float kp;                        // 145 Proportional gain kU 400-500
+extern float kd;                        // Derivative gain
+extern float ki;                        // Integrative gain
 
 //******************************************************************************
 //  Секция прототипов глобальных функций

@@ -83,10 +83,10 @@ int _write(int file, char *ptr, int len)
 	volatile uint32_t counter = 0;
 
 //	CDC_Transmit_FS((uint8_t *) ptr, len);
-	UART_SendString((const char *) ptr);
+	UART_SendString((const char *) ptr, len);
 
-	for(counter = 0; counter < 1000000; counter ++) // временная задержка
-		continue;
+//	for(counter = 0; counter < 1000000; counter ++) // временная задержка
+//		continue;
 
 	return len;
 }

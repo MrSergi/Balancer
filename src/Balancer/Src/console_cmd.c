@@ -1,14 +1,15 @@
-#include "conf.h"
 #include "console.h"
 #include "adc.h"
 #include "sensors.h"
+
 
 /*****************************************************************************
  * Function:		ftoa
  * ---------------------------------------------------------------------------
  * description:		Преобразование дробного числа в строку
- * parameters:		x - дробное число; floatString - преобразованная строка
- * on return:		преобразованная строка
+ * parameters:		float x - дробное число;
+ *                  char *floatString - преобразованная строка
+ * on return:		char* - преобразованная строка
  ****************************************************************************/
 char *ftoa(float x, char *floatString)
 {
@@ -94,13 +95,68 @@ void cmdStatus(int argc, const char * const * argv)
 //	fc_printf("ADC3:            %s V\r\n", string);
 
 	ftoa(SensGetTempCPU() / 10.0f, string);
-	fc_printf("CPU temp:         %s deg C\r\n", string);
+	fc_printf("CPU temp:        %s deg C\r\n", string);
 
 	ftoa(AccSensor.Temp, string);
-	fc_printf("Acc temp:         %s deg C\r\n", string);
+	fc_printf("Acc temp:        %s deg C\r\n", string);
 
 	ftoa(GyroSensor.Temp, string);
-	fc_printf("Gyro temp:        %s deg C\r\n", string);
+	fc_printf("Gyro temp:       %s deg C\r\n", string);
+}
+
+/*****************************************************************************
+ * Function:		CmdPIDSetup
+ * ---------------------------------------------------------------------------
+ * description:		Выводим различную информацию о плате
+ * parameters:
+ * on return:		void
+ ****************************************************************************/
+void cmdPIDSetup(int argc, const char * const * argv)
+{
+	char string[30];
+
+    if(argc == 2)
+    {
+    	if(strcmp(argv[1], "info") == 0)
+    	{
+    		ftoa(kp, string);
+    		fc_printf("Kp = %s\r\n", string);
+    		ftoa(ki, string);
+    		fc_printf("Ki = %s\r\n", string);
+    		ftoa(kd, string);
+    		fc_printf("Kd = %s\r\n", string);
+    	}
+    	else
+    	{
+			fc_printf("Unknown parameter\r\n");
+    	}
+    }
+
+    if(argc == 3)
+    {
+    	if(strcmp(argv[1], "kp") == 0)
+    	{
+    		kp = atoff(argv[2]);
+    		ftoa(kp, string);
+    		fc_printf("Kp = %s\r\n", string);
+    	}
+    	else if(strcmp(argv[1], "ki") == 0)
+    	{
+    		ki = atoff(argv[2]);
+    		ftoa(ki, string);
+    		fc_printf("Ki = %s\r\n", string);
+    	}
+    	else if(strcmp(argv[1], "kd") == 0)
+    	{
+    		kd = atoff(argv[2]);
+    		ftoa(kd, string);
+    		fc_printf("Kd = %s\r\n", string);
+    	}
+    	else
+    	{
+			fc_printf("Unknown parameter\r\n");
+    	}
+    }
 }
 
 /*****************************************************************************
