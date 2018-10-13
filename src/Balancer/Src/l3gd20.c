@@ -1,5 +1,5 @@
-
 #include "conf.h"
+#include "f1_i2c.h"
 #include "l3gd20.h"
 #include "lsm303dlhc.h"
 

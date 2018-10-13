@@ -18,7 +18,7 @@
 #include <math.h>
 
 #include "adc.h"
-#include "i2c.h"
+//#include "i2c.h"
 #include "uart.h"
 
 //#define DEBUG                            // Comment this out for final version

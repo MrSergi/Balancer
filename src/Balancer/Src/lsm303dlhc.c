@@ -25,6 +25,7 @@
 /* Includes ------------------------------------------------------------------*/
 //#include "main.h"
 #include "conf.h"
+#include "f1_i2c.h"
 
 #include "lsm303dlhc.h"
 
