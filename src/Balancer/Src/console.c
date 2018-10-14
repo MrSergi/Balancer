@@ -14,7 +14,7 @@
 #include "semphr.h"
 #include "cmsis_os.h"
 #include "microrl.h"
-#include "uart.h"
+#include "f1_uart.h"
 
 //******************************************************************************
 //  Секция определения переменных, используемых в модуле
@@ -212,9 +212,10 @@ static void prv_sigint (void)
 
 //*****************************************************************************
 //	Обработчик прерывания по приходу данных
-void consoleInput(uint8_t* Buf, uint32_t Len)
+//void consoleInput(uint8_t* Buf, uint32_t Len)
+void consoleInput(uint8_t Buf)
 {
-	uint32_t i;
+//	uint32_t i;
 	portBASE_TYPE xHigherPriorityTaskWoken;
 
 	/* We have not woken a task at the start of the ISR. */
@@ -222,11 +223,11 @@ void consoleInput(uint8_t* Buf, uint32_t Len)
 
 	if (xQueueCmdBuffer)
 	{
-		for (i = 0; i < Len; i++)
-		{
-			xQueueSendFromISR(xQueueCmdBuffer, &Buf[i], &xHigherPriorityTaskWoken);
+//		for (i = 0; i < Len; i++)
+//		{
+			xQueueSendFromISR(xQueueCmdBuffer, &Buf, &xHigherPriorityTaskWoken);
 //			xQueueSend(xQueueCmdBuffer, &Buf[i], 0U);
-		}
+//		}
 	}
 
 	/* Now the buffer is empty we can switch context if necessary. */
@@ -238,7 +239,9 @@ void microrl_sendString (const char * str)
 {
 //	CDC_Transmit_FS((uint8_t *)str, strlen(str));
 //	vTaskDelay(1);                                     // задержка при использовании предачи через VCP
-	UART_SendString((const char *)str, strlen(str));
+//	UART_SendString(SERIAL_GPS, (const char *)str, strlen(str));
+	uartWriteBin(SERIAL_UART1, (const uint8_t *) str, strlen(str));
+//	uartWriteBin(0, (const uint8_t *) str, strlen(str));
 }
 
 //******************************************************************************

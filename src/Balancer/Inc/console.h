@@ -5,7 +5,8 @@
 
 
 void consoleInit(void);
-void consoleInput(uint8_t* Buf, uint32_t Len);
+void consoleInput(uint8_t Buf);
+//void consoleInput(uint8_t* Buf, uint32_t Len);
 int fc_printf(const char * fmt, ...);
 
 //Define this macros with correct write/read terminal functions

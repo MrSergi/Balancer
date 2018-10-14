@@ -8,9 +8,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <f1_uart.h>
 //#include "usbd_cdc_vcp.h"
 #include "usbd_cdc_if.h"
-#include "uart.h"
+//#include "f1_uart.h"
 
 #undef errno
 extern int errno;
@@ -79,11 +80,12 @@ int _read(int file, char *ptr, int len)
 
 int _write(int file, char *ptr, int len)
 {
-//	VCP_DataTx((uint8_t *) ptr, len);
-	volatile uint32_t counter = 0;
+//	volatile uint32_t counter = 0;
 
+//	VCP_DataTx((uint8_t *) ptr, len);
 //	CDC_Transmit_FS((uint8_t *) ptr, len);
-	UART_SendString((const char *) ptr, len);
+//	UART_SendString(SERIAL_GPS, (const char *) ptr, len);
+	uartWriteBin(SERIAL_UART1, (const uint8_t *) ptr, len);
 
 //	for(counter = 0; counter < 1000000; counter ++) // временная задержка
 //		continue;

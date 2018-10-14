@@ -72,12 +72,11 @@ int16_t SensGetTempCPU(void)
 *************************************************************/
 void SensInit(void)
 {
-	uint8_t error = 0;
-
 	if (!l3gd20Detect())   // настраиваем гироскоп
 	{
 		// failureMode(3); // if this fails, we get a beep + blink pattern. we're doomed, no gyro or i2c error.
-		error = 1;
+//		error = 1;
+		Error_Handler();
 	}
 
 	lsm303dlhcConfig();    // настраиваем акселерометр и магнетометр

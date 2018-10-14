@@ -10,5 +10,5 @@ console.c:141:6:cmdHelp	24	static
 console.c:151:12:prv_execute	24	static
 console.c:171:16:prv_complet	32	static
 console.c:207:13:prv_sigint	8	static
-console.c:215:6:consoleInput	24	static
-console.c:237:6:microrl_sendString	16	static
+console.c:216:6:consoleInput	24	static
+console.c:238:6:microrl_sendString	16	static

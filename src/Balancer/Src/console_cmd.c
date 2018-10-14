@@ -71,6 +71,7 @@ void cmdStatus(int argc, const char * const * argv)
 	char string[30];
 
 	fc_printf("MCU clock        %u MHz\r\n", (uint16_t) (SystemCoreClock / 1000000));
+//	vTaskDelay(10);
 
 	uint16_t sz;
 	sz = *(__IO uint16_t*)(0x1FFFF7E0);

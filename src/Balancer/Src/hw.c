@@ -39,18 +39,18 @@ const i2c_cfg_t i2c_cfg[] =
 	},
 };
 
-//const uart_cfg_t uart_cfg[] =
-//{
-//	{
-//		.regs 			   = USART1,
-//		.tx_gpio_port 	   = GPIOA,
-//		.tx_gpio_pin 	   = GPIO_PIN_9,
-//		.rx_gpio_port 	   = GPIOA,
-//		.rx_gpio_pin 	   = GPIO_PIN_10,
-//		.NVIC_IRQChannel   = USART1_IRQn,
-//		.txBufferSize	   = 128,
-//	},
-//};
+const uart_cfg_t uart_cfg[] =
+{
+	{
+		.regs 			   = USART1,
+		.tx_gpio_port 	   = GPIOA,
+		.tx_gpio_pin 	   = GPIO_PIN_9,
+		.rx_gpio_port 	   = GPIOA,
+		.rx_gpio_pin 	   = GPIO_PIN_10,
+		.NVIC_IRQChannel   = USART1_IRQn,
+		.txBufferSize	   = 256,
+	},
+};
 
 //******************************************************************************
 //  Секция прототипов локальных функций
@@ -82,19 +82,13 @@ void hwInit(void)
 
 //	sysclock = HAL_RCC_GetSysClockFreq();
 
-__HAL_RCC_GPIOA_CLK_ENABLE();
-__HAL_RCC_GPIOB_CLK_ENABLE();
-__HAL_RCC_GPIOC_CLK_ENABLE();
-__HAL_RCC_GPIOD_CLK_ENABLE();
-
 	gpioInit(gpio_cfg, HW_GPIO_COUNT);
 
 	i2cConfig(i2c_cfg, 1);
 	i2cInit(0);
 
-//	uartConfig(uart_cfg, 1);
-//	uartInit(0, 9600, "8N1", consoleInput);
-	//	uartInit(0, 115200, "8N1", NULL);
+	uartConfig(uart_cfg, 1);
+	uartInit(SERIAL_UART1, 9600, "8N1", consoleInput);
 }
 
 
@@ -168,8 +162,8 @@ void SystemClock_Config(void)
 *******************************************************************************/
 void Error_Handler(void)
 {
-  static uint32_t delay = 0;
-  /* User can add his own implementation to report the HAL error return state */
+  uint32_t delay = 0;
+
   while(1)
   {
 	  for(delay = 0; delay < 1000000; delay++)

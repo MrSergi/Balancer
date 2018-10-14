@@ -43,7 +43,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
 extern DMA_HandleTypeDef hdma_adc1;
-extern UART_HandleTypeDef huart1;
+//extern UART_HandleTypeDef uart_drv[uart_id].huart;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 

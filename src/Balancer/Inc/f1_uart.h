@@ -11,27 +11,46 @@
 //  Секция определения констант
 //******************************************************************************
 
-#define UART_BOUD_RATE         		9600L
-#define uartSIZE_OF_RING_BUFFER		256
 #define USE_FREERTOS				//uncomment this for using freeRTOS semaphore
-#define UART_NO_DATA				(-1)
-
-#define USARTx						USART1
-#define USART_Pin_Tx				GPIO_PIN_9
-#define USART_Pin_Rx				GPIO_PIN_10
-#define USART_GPIO				    GPIOA
-#define USARTx_IRQHandler			USART1_IRQHandler
-//#define USARTx_IRQn				USART1_IRQn
 
 //******************************************************************************
 //  Секция определения типов
 //******************************************************************************
 
-typedef struct {
-	uint8_t data[uartSIZE_OF_RING_BUFFER];
-	int wrIdx;
-	int rdIdx;
-} sRingBuf_t;
+typedef void (* uartRxCallbackPtr)(uint8_t data);   // used by uart driver to return recieved data to app
+
+typedef enum serial_uart_t                          // Serial port device ID
+{
+	SERIAL_UART_NOTSET = -1,
+    SERIAL_UART1 = 0,
+    SERIAL_UART2 = 1,
+    SERIAL_UART3 = 2,
+    SERIAL_UART4 = 3,
+    SERIAL_UART5 = 4,
+    SERIAL_UART_NUM
+} serial_uart_t;
+
+typedef struct uart_drv_t
+{
+	UART_HandleTypeDef  huart;
+	USART_TypeDef 	   *regs;				        /* UART port */
+	uint8_t 		   *txBuffer;
+	uint32_t 			txBufferTail;
+	uint32_t 			txBufferHead;
+	uartRxCallbackPtr 	uartCallback;
+	char 				uart_mode[4];	            /* Режим порта в формате "8N1" */
+} uart_drv_t;
+
+typedef struct uart_cfg_t                           /* UART config structure */
+{
+	USART_TypeDef 	   *regs;				        /* UART port */
+	GPIO_TypeDef 	   *rx_gpio_port;
+	uint16_t			rx_gpio_pin;
+	GPIO_TypeDef 	   *tx_gpio_port;
+	uint16_t			tx_gpio_pin;
+	uint8_t 			NVIC_IRQChannel;
+	uint16_t 			txBufferSize;
+} uart_cfg_t;
 
 //******************************************************************************
 //  Секция определения глобальных переменных
@@ -42,10 +61,13 @@ typedef struct {
 //  Секция прототипов глобальных функций
 //******************************************************************************
 
-void UART_Init();
-void UART_SendChar(uint8_t data);
-void UART_SendString(const char *str, int len);
+int32_t uartInit(uint8_t uart_id, uint32_t speed, char *mode, uartRxCallbackPtr func);
+void uartConfig(const uart_cfg_t * cfg, uint8_t num);
+void UART_SendChar(uint8_t uart_id, uint8_t data);
+void UART_SendString(uint8_t uart_id, const char *str, int len);
 int UART_GetChar();
+
+void uartWriteBin(uint8_t uart_id, const uint8_t * buff, uint32_t len);
 
 #ifdef USE_FREERTOS
 int UART_GetCharBlocking();
