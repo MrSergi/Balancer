@@ -74,8 +74,8 @@ void DebugTask (void *pvParameters)
     {
     	NByte = 0;
     	Angle = (int16_t)pAngle;
-    	AccAngle = direction;//(int16_t)AccSensor.Angle[Y];
-    	GyroAngle = (int16_t)(DriveSpeed * 10.0);//(int16_t)GyroAngleX;
+//    	AccAngle = direction;//(int16_t)AccSensor.Angle[Y];
+//    	GyroAngle = (int16_t)(DriveSpeed * 10.0);//(int16_t)GyroAngleX;
 
     	TxData[NByte++] = 0x12;
     	TxData[NByte++] = Angle & 0xFF;
@@ -106,9 +106,8 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 
 	SensInit();
 
-	MotorCtrlDrive(0.0);
+//	MotorCtrlDrive(0.0);
 	vTaskDelay(1000);
-
 
 #ifdef DEBUG
 	xTaskCreate(	DebugTask,"debug",
@@ -121,7 +120,7 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 	xTaskCreate(	vLedTask,"led",
 					128,
 					NULL,
-					tskIDLE_PRIORITY + 1,         // ����� ������ ��������� ����� 0
+					tskIDLE_PRIORITY + 1,
 					NULL);
 
 	xTaskCreate(	microrl_run,"microrl",
@@ -143,17 +142,6 @@ portTASK_FUNCTION_PROTO(initTask, pvParameters)
 
 int main(void)
 {
-//	/* Disable all interrupts */
-//	__set_PRIMASK(1);
-//
-//	/* Set the Vector Table base location at 0x4000 */
-////	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x4000);
-//	SCB->VTOR = (FLASH_BASE | 0x4000);
-//
-//	/* Enable all interrupts */
-//	__set_PRIMASK(0);
-
-	//		   Task_func		       Task_name   Stack	    Param  Prio			   Handler
 	xTaskCreate(initTask, (const char *) "Init",  128, (void *) NULL, 2, (xTaskHandle *) NULL);
 
 	vTaskStartScheduler();
@@ -179,13 +167,12 @@ static void MX_DMA_Init(void)
 uint32_t micros(void)
 {
 	register uint32_t ms, cycle_cnt;
-    do
-    {
-        ms = sysTickUptime;
-        cycle_cnt = SysTick->VAL;
-    } while (ms != sysTickUptime);
+	do {
+		ms = sysTickUptime;
+		cycle_cnt = SysTick->VAL;
+	} while(ms != sysTickUptime);
 
-    return ((float)ms * 1000.0) + (72000.0 - (float)cycle_cnt) / 72.0;
+	return ((float) ms * 1000.0) + (72000.0 - (float) cycle_cnt) / 72.0;
 }
 
 //void vApplicationMallocFailedHook( void )

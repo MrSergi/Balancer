@@ -1,60 +1,48 @@
-/*
- * motor.h
- *
- *  Created on: 12 сент. 2018 г.
- *      Author: Sergey
- */
-
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
-//******************************************************************************
-//  Секция include
-//******************************************************************************
-
 #include "conf.h"
 #include "tim.h"
+#include <math.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-//******************************************************************************
-//  Секция определения констант
-//******************************************************************************
+typedef enum {
+    STOP = 0,
+    BACKWARD = 1,
+    FORWARD = 2
+} Direction;
 
-enum         // Направление вращения мотора
-{
-	STOP = 0,
-	BACKWARD = 0,
-	FORWARD
+class Motor {
+public:
+    Motor(GPIO_TypeDef* leftDirPort, uint16_t leftDirPin,
+          GPIO_TypeDef* rightDirPort, uint16_t rightDirPin,
+          uint8_t leftPwmChannel, uint8_t rightPwmChannel);
+
+    void Drive(float speed);
+    void Stop();
+    Direction GetDirection() const;
+    float GetSpeed() const;
+
+private:
+    GPIO_TypeDef* leftDirPort;
+    uint16_t leftDirPin;
+    GPIO_TypeDef* rightDirPort;
+    uint16_t rightDirPin;
+    uint8_t leftPwmChannel;
+    uint8_t right_pwm_channel;
+    Direction current_direction;
+    uint16_t current_speed;
+
+    Direction DetermineDirection(float speed) const;
+    void SetDirection(Direction direction);
+    void SetSpeed(uint16_t speed);
 };
 
-#define MOTOR_LEFT_DIR(dir)       {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, dir);}
-#define MOTOR_RIGHT_DIR(dir)      {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, dir);}
-#define MOTOR_LEFT_SPEED(speed)   {TimPWMSetPulseValue(3, speed);}
-#define MOTOR_RIGHT_SPEED(speed)  {TimPWMSetPulseValue(1, speed);}
+#ifdef __cplusplus
+}
+#endif
 
-//******************************************************************************
-//  Секция определения типов
-//******************************************************************************
-
-
-//******************************************************************************
-//  Секция определения глобальных переменных
-//******************************************************************************
-
-extern int direction;
-
-//******************************************************************************
-//  Секция прототипов глобальных функций
-//******************************************************************************
-
-void MotorCtrlDrive(float speed);
-
-//******************************************************************************
-//  Секция определения макросов
-//******************************************************************************
-
-#endif                   // Закрывающий #endif к блокировке повторного включения
-
-//******************************************************************************
-//  ENF OF FILE
-//******************************************************************************
+#endif  // MOTOR_H_

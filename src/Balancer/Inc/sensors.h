@@ -1,40 +1,25 @@
-/*
- * sensors.h
- *
- *  Created on: 4 июл. 2018 г.
- *      Author: Sergey Pervushkin
- */
 
-#ifndef SENSORS_H_   // Блокируем повторное включение этого модуля
+#ifndef SENSORS_H_
 #define SENSORS_H_
-
-//******************************************************************************
-//  Секция include
-//******************************************************************************
 
 #include "conf.h"
 #include "lsm303dlhc.h"
 #include "l3gd20.h"
-#include "motor.h"
+//#include "motor.h"
 
-//******************************************************************************
-//  Секция определения констант
-//******************************************************************************
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define RAD_TO_DEG   57.29577951308232087679815481410517033f
 #define S_PI         3.14159265358979323846f
 
 
-enum         // Оси датчиков
-{
-    X = 0,
-    Y,
-    Z
+enum {
+	X = 0,
+	Y,
+	Z
 };
-
-//******************************************************************************
-//  Секция определения типов
-//******************************************************************************
 
 typedef struct acc_sensor_t
 {
@@ -45,7 +30,7 @@ typedef struct acc_sensor_t
 	float		DataMW[3];				// Accel sensor data scaled to MultiWii
 	float		Average[3];				// Average value (degrees / second)
 	float		Variance[3];			// Variance (degrees / second)
-	float		Angle[3];				// Угол отклонения (градус)
+	float		Angle[3];				// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ)
 } acc_sensor_t;
 
 typedef struct gyro_sensor_t {
@@ -56,35 +41,28 @@ typedef struct gyro_sensor_t {
 	float		DataRad[3];			    // Gyro sensor data. Scaled to radian / second
 	float		Average[3];				// Average value (degrees / second)
 	float		Variance[3];			// Variance (degrees / second)
-	float		Angle[3];				// Угол отклонения (градус)
+	float		Angle[3];				// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ)
 } gyro_sensor_t;
 
-//******************************************************************************
-//  Секция определения глобальных переменных
-//******************************************************************************
 
 extern acc_sensor_t AccSensor;
 extern gyro_sensor_t GyroSensor;
 extern float pAngle;
 extern float GyroAngleX;
-extern float DriveSpeed;
+//extern float DriveSpeed;
 extern float kp;                        // 145 Proportional gain kU 400-500
 extern float kd;                        // Derivative gain
 extern float ki;                        // Integrative gain
 
-//******************************************************************************
-//  Секция прототипов глобальных функций
-//******************************************************************************
 
 void SensInit(void);
 int16_t SensGetTempCPU(void);
 portTASK_FUNCTION_PROTO(SensorTask, pvParameters);
 
-//******************************************************************************
-//  Секция определения макросов
-//******************************************************************************
-
-#endif                   // Закрывающий #endif к блокировке повторного включения
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 //******************************************************************************
 //  ENF OF FILE

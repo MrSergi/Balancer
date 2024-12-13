@@ -6,10 +6,10 @@
 /*****************************************************************************
  * Function:		ftoa
  * ---------------------------------------------------------------------------
- * description:		Преобразование дробного числа в строку
- * parameters:		float x - дробное число;
- *                  char *floatString - преобразованная строка
- * on return:		char* - преобразованная строка
+ * description:		пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+ * parameters:		float x - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ;
+ *                  char *floatString - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+ * on return:		char* - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
  ****************************************************************************/
 char *ftoa(float x, char *floatString)
 {
@@ -59,13 +59,6 @@ char *ftoa(float x, char *floatString)
     return floatString;
 }
 
-/*****************************************************************************
- * Function:		cmdStatus
- * ---------------------------------------------------------------------------
- * description:		Выводим различную информацию о плате
- * parameters:
- * on return:		void
- ****************************************************************************/
 void cmdStatus(int argc, const char * const * argv)
 {
 	char string[30];
@@ -105,65 +98,58 @@ void cmdStatus(int argc, const char * const * argv)
 	fc_printf("Gyro temp:       %s deg C\r\n", string);
 }
 
-/*****************************************************************************
- * Function:		CmdPIDSetup
- * ---------------------------------------------------------------------------
- * description:		Выводим различную информацию о плате
- * parameters:
- * on return:		void
- ****************************************************************************/
 void cmdPIDSetup(int argc, const char * const * argv)
 {
-	char string[30];
-
-    if(argc == 2)
-    {
-    	if(strcmp(argv[1], "info") == 0)
-    	{
-    		ftoa(kp, string);
-    		fc_printf("Kp = %s\r\n", string);
-    		ftoa(ki, string);
-    		fc_printf("Ki = %s\r\n", string);
-    		ftoa(kd, string);
-    		fc_printf("Kd = %s\r\n", string);
-    	}
-    	else
-    	{
-			fc_printf("Unknown parameter\r\n");
-    	}
-    }
-
-    if(argc == 3)
-    {
-    	if(strcmp(argv[1], "kp") == 0)
-    	{
-    		kp = atoff(argv[2]);
-    		ftoa(kp, string);
-    		fc_printf("Kp = %s\r\n", string);
-    	}
-    	else if(strcmp(argv[1], "ki") == 0)
-    	{
-    		ki = atoff(argv[2]);
-    		ftoa(ki, string);
-    		fc_printf("Ki = %s\r\n", string);
-    	}
-    	else if(strcmp(argv[1], "kd") == 0)
-    	{
-    		kd = atoff(argv[2]);
-    		ftoa(kd, string);
-    		fc_printf("Kd = %s\r\n", string);
-    	}
-    	else
-    	{
-			fc_printf("Unknown parameter\r\n");
-    	}
-    }
+//	char string[30];
+//
+//    if(argc == 2)
+//    {
+//    	if(strcmp(argv[1], "info") == 0)
+//    	{
+//    		ftoa(kp, string);
+//    		fc_printf("Kp = %s\r\n", string);
+//    		ftoa(ki, string);
+//    		fc_printf("Ki = %s\r\n", string);
+//    		ftoa(kd, string);
+//    		fc_printf("Kd = %s\r\n", string);
+//    	}
+//    	else
+//    	{
+//			fc_printf("Unknown parameter\r\n");
+//    	}
+//    }
+//
+//    if(argc == 3)
+//    {
+//    	if(strcmp(argv[1], "kp") == 0)
+//    	{
+//    		kp = atoff(argv[2]);
+//    		ftoa(kp, string);
+//    		fc_printf("Kp = %s\r\n", string);
+//    	}
+//    	else if(strcmp(argv[1], "ki") == 0)
+//    	{
+//    		ki = atoff(argv[2]);
+//    		ftoa(ki, string);
+//    		fc_printf("Ki = %s\r\n", string);
+//    	}
+//    	else if(strcmp(argv[1], "kd") == 0)
+//    	{
+//    		kd = atoff(argv[2]);
+//    		ftoa(kd, string);
+//    		fc_printf("Kd = %s\r\n", string);
+//    	}
+//    	else
+//    	{
+//			fc_printf("Unknown parameter\r\n");
+//    	}
+//    }
 }
 
 /*****************************************************************************
  * Function:		cmdClear
  * ---------------------------------------------------------------------------
- * description:		Очищаем экран консоли
+ * description:		пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  * parameters:
  * on return:		void
  ****************************************************************************/

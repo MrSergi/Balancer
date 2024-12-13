@@ -1,4 +1,4 @@
-console_cmd.c:14:7:ftoa	56	static
-console_cmd.c:69:6:cmdStatus	64	static
-console_cmd.c:115:6:cmdPIDSetup	48	static
-console_cmd.c:171:6:cmdClear	16	static
+../Src/console_cmd.c:14:7:ftoa	56	static
+../Src/console_cmd.c:62:6:cmdStatus	64	static
+../Src/console_cmd.c:101:6:cmdPIDSetup	16	static
+../Src/console_cmd.c:157:6:cmdClear	16	static

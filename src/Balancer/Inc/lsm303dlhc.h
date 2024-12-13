@@ -459,6 +459,10 @@ NO_CLICK                        =               0x00
 #define ValBit(VAR,Place)         (VAR & (1<<Place))
 #define BIT(x) ( (x) )
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Exported functions --------------------------------------------------------*/
 //Sensor Configuration Functions
 status_t SetODR(ODR_t ov);
@@ -524,6 +528,10 @@ status_t GetMagAxesRaw(MagAxesRaw_t* buff);
 void lsm303dlhcConfig(void);
 void lsm303dlhcReadAcc(int16_t *accData);
 void lsm303dlhcReadMag(int16_t *magData);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LIS3DH_H */
 

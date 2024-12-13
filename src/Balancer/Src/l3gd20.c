@@ -105,19 +105,18 @@ static void l3gd20IrqConfig(void)
 
 bool l3gd20Config(void)
 {
-    bool ack;
+	bool ack;
 
-    ack = i2cWrite(L3GD20_ADDRESS, L3GD20_CTRL_REG4, L3GD20_FS_SEL_2000DPS);
-    if (ack)
-    {
-    	return false;
-    }
+	ack = i2cWrite(L3GD20_ADDRESS, L3GD20_CTRL_REG4, L3GD20_FS_SEL_2000DPS);
+	if(ack) {
+		return false;
+	}
 
-    ack = i2cWrite(L3GD20_ADDRESS, L3GD20_CTRL_REG1, L3GD20_POWER_ON | L3GD20_ODR_760HZ);
-    if (ack)
-    {
-    	return false;
-    }
+	ack = i2cWrite(L3GD20_ADDRESS, L3GD20_CTRL_REG1,
+			L3GD20_POWER_ON | L3GD20_ODR_760HZ);
+	if(ack) {
+		return false;
+	}
 
 #if USE_SENSOR_IRQ
     i2cWrite(L3GD20_ADDRESS, L3GD20_CTRL_REG3, L3GD20_I2_DRDY);
@@ -134,20 +133,23 @@ bool l3gd20Config(void)
 
 bool l3gd20Detect(void)
 {
-    uint8_t deviceid;
+	uint8_t deviceid;
 
-    if (!i2cRead(L3GD20_ADDRESS, L3GD20_WHO_AM_I, 1, &deviceid))
-    	return false;
+	if(!i2cRead(L3GD20_ADDRESS, L3GD20_WHO_AM_I, 1, &deviceid)) {
+		return false;
+	}
 
-    if (deviceid != L3GD20_ID)
-        return false;
+	if(deviceid != L3GD20_ID) {
+		return false;
+	}
 
-    l3gd20IrqConfig();
+	l3gd20IrqConfig();
 
-    if (!l3gd20Config())
-    	return false;
+	if(!l3gd20Config()) {
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 // Read 3 gyro values into user-provided buffer. No overrun checking is done.

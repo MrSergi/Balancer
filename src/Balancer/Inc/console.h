@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void consoleInit(void);
 void consoleInput(uint8_t Buf);
@@ -33,5 +36,8 @@ typedef struct _console_cmd_t
 } console_cmd_t;
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
